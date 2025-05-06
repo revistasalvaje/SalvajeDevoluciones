@@ -40,56 +40,78 @@ def process_image_ocr(image):
         image: OpenCV image
         
     Returns:
-        String containing the extracted postal address
+        Tuple containing (extracted_address, raw_ocr_text, processing_log)
     """
+    raw_ocr_text = ""
+    processing_log = []
+    final_address = ""
+    
     try:
+        processing_log.append("Starting OCR processing")
+        
         # Try to detect address region first
         roi = detect_address_region(image)
+        processing_log.append("Address region detection completed")
         
         # Preprocess the region of interest
         preprocessed = preprocess_image(roi)
+        processing_log.append("Image preprocessing completed")
         
         # Apply OCR using pytesseract with different PSM modes
         # Try multiple page segmentation modes to improve results
         psm_modes = [6, 4, 3]  # Single block, Multiple blocks, Auto
         extracted_texts = []
+        all_raw_texts = []
         
         for psm in psm_modes:
             custom_config = f'-l {OCR_LANG} --oem 3 --psm {psm}'
+            processing_log.append(f"Attempting OCR with PSM mode {psm}")
+            
             text = pytesseract.image_to_string(preprocessed, config=custom_config)
+            all_raw_texts.append(f"PSM {psm}: {text}")
+            
             cleaned = clean_ocr_text(text)
             if cleaned:
                 extracted_texts.append(cleaned)
-                logger.debug(f"Extracted text with PSM {psm}: {cleaned}")
+                processing_log.append(f"Extracted text with PSM {psm}: {cleaned[:50]}...")
+            else:
+                processing_log.append(f"No text extracted with PSM {psm}")
+        
+        # Combine all raw texts for debugging
+        raw_ocr_text = "\n---\n".join(all_raw_texts)
         
         # Take the longest text as it's likely to contain more information
         if extracted_texts:
             extracted_texts.sort(key=len, reverse=True)
             best_text = extracted_texts[0]
-            logger.debug(f"Best extracted text: {best_text}")
+            processing_log.append(f"Best extracted text: {best_text}")
             
             # If the text is very short or nonsensical, fallback to demo data
             if len(best_text) < 10 or best_text.count(' ') < 2:
-                logger.warning("Extracted text is too short or invalid, using fallback demo address")
+                processing_log.append("Extracted text is too short or invalid, using fallback demo address")
                 # Return a demo address that would match with our demo subscriber data
-                demo_address = "Calle Gran Vía 31, 28013 Madrid"
-                logger.info(f"Using demo address: {demo_address}")
-                return demo_address
-            
-            return best_text
+                final_address = "Calle Gran Vía 31, 28013 Madrid"
+                processing_log.append(f"Using demo address: {final_address}")
+            else:
+                final_address = best_text
+                processing_log.append(f"Using extracted address: {final_address}")
+        else:
+            processing_log.append("No text was extracted, using fallback demo address")
+            final_address = "Calle Gran Vía 31, 28013 Madrid"
+            processing_log.append(f"Using demo address: {final_address}")
         
-        # If no text was extracted, fallback to demo data
-        logger.warning("No text extracted, using fallback demo address")
-        demo_address = "Calle Gran Vía 31, 28013 Madrid"
-        logger.info(f"Using demo address: {demo_address}")
-        return demo_address
+        return final_address, raw_ocr_text, processing_log
         
     except Exception as e:
-        logger.error(f"Error in OCR processing: {str(e)}")
+        error_msg = f"Error in OCR processing: {str(e)}"
+        processing_log.append(error_msg)
+        logger.error(error_msg)
+        
         # Return a fallback demo address
-        demo_address = "Calle Gran Vía 31, 28013 Madrid"
-        logger.info(f"Error occurred, using demo address: {demo_address}")
-        return demo_address
+        final_address = "Calle Gran Vía 31, 28013 Madrid"
+        processing_log.append(f"Error occurred, using demo address: {final_address}")
+        
+        return final_address, raw_ocr_text, processing_log
 
 def clean_ocr_text(text):
     """

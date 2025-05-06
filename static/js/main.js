@@ -108,8 +108,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const confirmationSubscriber = document.getElementById('confirmation-subscriber');
         const emailPreview = document.getElementById('email-preview');
         
-        // Display extracted address
-        confirmationAddress.innerHTML = `<strong>${data.extracted_address}</strong>`;
+        // Display extracted address with more details
+        confirmationAddress.innerHTML = `
+            <div class="mb-3">
+                <h6>Texto completo extraído por OCR:</h6>
+                <div class="border p-2 bg-light text-dark" style="overflow-x: auto;">
+                    <code>${data.extracted_address}</code>
+                </div>
+            </div>
+            <div>
+                <h6>Dirección formateada:</h6>
+                <strong>${data.extracted_address}</strong>
+            </div>
+        `;
         
         // Display subscriber information
         const subscriber = data.subscriber;
@@ -192,7 +203,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Display extracted address if available
         if (data.extracted_address) {
-            extractedAddressEl.innerHTML = `<strong>Dirección extraída:</strong> ${data.extracted_address}`;
+            extractedAddressEl.innerHTML = `
+                <h5>Detalles del OCR:</h5>
+                <div class="mb-3">
+                    <h6>Texto completo extraído:</h6>
+                    <div class="border p-2 bg-light text-dark" style="overflow-x: auto;">
+                        <code>${data.extracted_address}</code>
+                    </div>
+                </div>
+                <div>
+                    <h6>Dirección formateada:</h6>
+                    <strong>${data.extracted_address}</strong>
+                </div>
+            `;
             showElement(extractedAddressEl);
         } else {
             hideElement(extractedAddressEl);

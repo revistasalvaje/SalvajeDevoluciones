@@ -81,9 +81,18 @@ def process_image():
         
         # Process the image with OCR
         logger.debug("Processing image with OCR")
-        extracted_address = process_image_ocr(img)
+        extracted_address, ocr_raw_text, processing_log = process_image_ocr(img)
+        
         if not extracted_address:
-            return jsonify({'error': 'Could not extract any address from the image'}), 400
+            return jsonify({
+                'error': 'Could not extract any address from the image',
+                'ocr_raw_text': ocr_raw_text,
+                'processing_log': processing_log
+            }), 400
+            
+        logger.debug(f"OCR processing log: {processing_log}")
+        logger.debug(f"Raw OCR text: {ocr_raw_text}")
+        logger.debug(f"Final extracted address: {extracted_address}")
         
         # Get subscriber data from Google Sheets
         logger.debug("Fetching subscriber data from Google Sheets")
