@@ -59,9 +59,25 @@ def process_image():
             return jsonify({'error': 'No image data received'}), 400
         
         # Convert base64 image to OpenCV format
-        encoded_data = image_data.split(',')[1]
-        nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        try:
+            # Check if the image data is valid
+            if ',' in image_data:
+                encoded_data = image_data.split(',')[1]
+                nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
+                if nparr.size == 0:
+                    logger.error("Image data buffer is empty")
+                    return jsonify({'error': 'La imagen capturada está vacía'}), 400
+                
+                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                if img is None:
+                    logger.error("Failed to decode image")
+                    return jsonify({'error': 'No se pudo decodificar la imagen'}), 400
+            else:
+                logger.error("Invalid image data format")
+                return jsonify({'error': 'Formato de imagen no válido'}), 400
+        except Exception as img_error:
+            logger.error(f"Error processing image data: {str(img_error)}")
+            return jsonify({'error': 'Error al procesar los datos de la imagen'}), 400
         
         # Process the image with OCR
         logger.debug("Processing image with OCR")
