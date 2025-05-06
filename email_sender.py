@@ -45,6 +45,25 @@ def send_notification_email(subscriber):
             logger.error("No recipient email provided")
             return False
         
+        # Check if we're using SendGrid
+        if os.environ.get('SENDGRID_API_KEY'):
+            return send_email_via_sendgrid(subscriber, recipient_email)
+        else:
+            # Try SMTP if configurable
+            if EMAIL_SENDER and EMAIL_PASSWORD and not EMAIL_SENDER.startswith('your-email'):
+                return send_email_via_smtp(subscriber, recipient_email)
+            else:
+                # Demo mode - simulate successful email sending
+                logger.info(f"DEMO MODE: Email would be sent to {recipient_email}")
+                return True
+    
+    except Exception as e:
+        logger.error(f"Failed to send email: {str(e)}")
+        return False
+
+def send_email_via_smtp(subscriber, recipient_email):
+    """Send email using SMTP"""
+    try:
         # Create message container
         msg = MIMEMultipart('alternative')
         msg['Subject'] = EMAIL_SUBJECT
@@ -64,9 +83,46 @@ def send_notification_email(subscriber):
             server.login(EMAIL_SENDER, EMAIL_PASSWORD)
             server.send_message(msg)
         
-        logger.info(f"Email notification sent to {recipient_email}")
+        logger.info(f"Email notification sent via SMTP to {recipient_email}")
+        return True
+    except Exception as e:
+        logger.error(f"SMTP error: {str(e)}")
+        return False
+
+def send_email_via_sendgrid(subscriber, recipient_email):
+    """Send email using SendGrid"""
+    try:
+        # Import SendGrid only when needed
+        from sendgrid import SendGridAPIClient
+        from sendgrid.helpers.mail import Mail, Email, To, Content
+        
+        # Get SendGrid API key
+        api_key = os.environ.get('SENDGRID_API_KEY')
+        if not api_key:
+            logger.error("SendGrid API key not found")
+            return False
+        
+        # Render email template
+        html_content = render_email_template(subscriber)
+        
+        # Create message
+        from_email = Email(EMAIL_SENDER if not EMAIL_SENDER.startswith('your-email') else "noreply@example.com")
+        to_email = To(recipient_email)
+        
+        message = Mail(
+            from_email=from_email,
+            to_emails=to_email,
+            subject=EMAIL_SUBJECT,
+            html_content=Content("text/html", html_content)
+        )
+        
+        # Send email
+        sg = SendGridAPIClient(api_key)
+        response = sg.send(message)
+        
+        logger.info(f"Email notification sent via SendGrid to {recipient_email}")
         return True
     
     except Exception as e:
-        logger.error(f"Failed to send email: {str(e)}")
+        logger.error(f"SendGrid error: {str(e)}")
         return False

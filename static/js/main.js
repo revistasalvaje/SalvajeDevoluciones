@@ -226,6 +226,82 @@ document.addEventListener('DOMContentLoaded', function() {
         showElement(restartBtn);
     }
     
+    // Load email preview
+    function loadEmailPreview(subscriber) {
+        const emailPreview = document.getElementById('email-preview');
+        emailPreview.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Cargando...</span></div><p class="mt-2">Cargando vista previa del email...</p></div>';
+        
+        fetch('/preview-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber: subscriber })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                emailPreview.innerHTML = data.email_html;
+            } else {
+                emailPreview.innerHTML = '<div class="alert alert-warning">No se pudo cargar la vista previa del email</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            emailPreview.innerHTML = '<div class="alert alert-danger">Error al cargar la vista previa</div>';
+        });
+    }
+    
+    // Setup confirmation buttons
+    function setupConfirmationButtons(data) {
+        const editBtn = document.getElementById('edit-btn');
+        const sendEmailBtn = document.getElementById('send-email-btn');
+        const confirmationContainer = document.getElementById('confirmation-container');
+        
+        // Edit button goes back to manual entry
+        editBtn.addEventListener('click', function() {
+            hideElement(confirmationContainer);
+            
+            // Show manual form and populate with the extracted address
+            showElement(manualAddressForm);
+            manualAddressInput.value = data.extracted_address;
+            showElement(restartBtn);
+        });
+        
+        // Send email button
+        sendEmailBtn.addEventListener('click', function() {
+            // Disable button and show loading
+            sendEmailBtn.disabled = true;
+            sendEmailBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
+            
+            // Send email
+            fetch('/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    subscriber: data.subscriber,
+                    extracted_address: data.extracted_address
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Hide confirmation screen
+                hideElement(confirmationContainer);
+                
+                // Show result
+                displayResults(result);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                sendEmailBtn.disabled = false;
+                sendEmailBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i> Enviar email';
+                alert('Error al enviar el email: ' + (error.message || 'Error desconocido'));
+            });
+        });
+    }
+    
     // Restart the application
     function restartApp() {
         // Clear previous results
@@ -234,9 +310,12 @@ document.addEventListener('DOMContentLoaded', function() {
         subscriberInfoEl.innerHTML = '';
         manualAddressInput.value = '';
         
-        // Hide result container and show webcam
+        // Hide containers
         hideElement(resultContainer);
         hideElement(manualAddressForm);
+        hideElement(document.getElementById('confirmation-container'));
+        
+        // Show webcam elements
         showElement(manualEntryBtn);
         
         // Initialize webcam again
@@ -274,6 +353,12 @@ document.addEventListener('DOMContentLoaded', function() {
     restartBtn.addEventListener('click', restartApp);
     manualEntryBtn.addEventListener('click', toggleManualEntry);
     submitManualBtn.addEventListener('click', processManualAddress);
+    
+    // Add event listener for new search button
+    const newSearchBtn = document.getElementById('new-search-btn');
+    if (newSearchBtn) {
+        newSearchBtn.addEventListener('click', restartApp);
+    }
     
     // Setup demo address listeners
     setupDemoAddressListeners();
