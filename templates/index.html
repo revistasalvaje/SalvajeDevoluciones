@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card bg-dark">
+            <div class="card-body">
+                <!-- Webcam Capture Section -->
+                <div id="webcam-container" class="mb-3"></div>
+                
+                <!-- Control Buttons -->
+                <div class="d-flex justify-content-center mb-3">
+                    <button id="capture-btn" class="btn btn-primary control-btn">
+                        <i class="fas fa-camera me-1"></i> Capturar imagen
+                    </button>
+                    
+                    <button id="manual-entry-btn" class="btn btn-secondary control-btn">
+                        <i class="fas fa-keyboard me-1"></i> Entrada manual
+                    </button>
+                    
+                    <button id="restart-btn" class="btn btn-warning control-btn d-none">
+                        <i class="fas fa-redo me-1"></i> Reiniciar
+                    </button>
+                </div>
+                
+                <!-- Manual Address Entry Form -->
+                <div id="manual-address-form" class="d-none">
+                    <div class="form-group mb-3">
+                        <label for="manual-address-input" class="form-label">Introduce la dirección del sobre devuelto:</label>
+                        <textarea id="manual-address-input" class="form-control" rows="4" placeholder="Ej: Calle Ejemplo, 123, 28001 Madrid"></textarea>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <button id="submit-manual-btn" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Buscar suscriptor
+                        </button>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="demoAddressDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-lightbulb me-1"></i> Usar dirección de ejemplo
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="demoAddressDropdown">
+                                <li><a class="dropdown-item demo-address" href="#" data-address="Calle Gran Vía 31, 28013 Madrid">Gran Vía 31, Madrid</a></li>
+                                <li><a class="dropdown-item demo-address" href="#" data-address="Avda. Diagonal 423, 08036 Barcelona">Diagonal 423, Barcelona</a></li>
+                                <li><a class="dropdown-item demo-address" href="#" data-address="Plaza Nueva 15, 41001 Sevilla">Plaza Nueva 15, Sevilla</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-info small">
+                        <i class="fas fa-info-circle me-1"></i> En un entorno de demostración, puede usar las direcciones de ejemplo para probar la funcionalidad.
+                    </div>
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div id="loading-indicator" class="d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <span class="ms-2">Procesando...</span>
+                </div>
+                
+                <!-- Result Display -->
+                <div id="result-container" class="d-none">
+                    <h4 class="mb-3">Resultado del procesamiento</h4>
+                    
+                    <div id="status-message" class="alert alert-info"></div>
+                    
+                    <div id="extracted-address" class="d-none"></div>
+                    
+                    <div id="subscriber-info" class="d-none"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions Card -->
+        <div class="card bg-dark mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Instrucciones de uso</h5>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li class="mb-2">Coloca el sobre devuelto frente a la cámara, asegurándote de que la dirección sea visible.</li>
+                    <li class="mb-2">Haz clic en "Capturar imagen" para tomar una foto del sobre.</li>
+                    <li class="mb-2">El sistema extraerá la dirección postal mediante OCR y buscará coincidencias en la base de datos de suscriptores.</li>
+                    <li class="mb-2">Si se encuentra una coincidencia, se enviará automáticamente un email al suscriptor.</li>
+                    <li>Si prefieres introducir la dirección manualmente, haz clic en "Entrada manual".</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

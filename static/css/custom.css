@@ -1,0 +1,99 @@
+/* Custom styles for the OCR application */
+
+/* Webcam container styling */
+#webcam-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 75%; /* 4:3 aspect ratio */
+    overflow: hidden;
+    background-color: var(--bs-dark);
+    border-radius: 8px;
+}
+
+#webcam-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Control buttons styling */
+.control-btn {
+    margin: 10px 5px;
+}
+
+/* Results container styling */
+#result-container {
+    background-color: var(--bs-dark);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+/* Status message styling */
+#status-message {
+    margin: 15px 0;
+    font-weight: bold;
+}
+
+.success-message {
+    color: var(--bs-success);
+}
+
+.error-message {
+    color: var(--bs-danger);
+}
+
+/* Extracted address and subscriber info styling */
+#extracted-address,
+#subscriber-info {
+    background-color: var(--bs-gray-800);
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+/* Loading indicator */
+#loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+/* Manual address form */
+#manual-address-form {
+    margin: 20px 0;
+}
+
+#manual-address-input {
+    min-height: 100px;
+}
+
+/* App header */
+.app-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* App footer */
+.app-footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--bs-gray-600);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    #webcam-container {
+        padding-bottom: 100%; /* More square on mobile */
+    }
+}

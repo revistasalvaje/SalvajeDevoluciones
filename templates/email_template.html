@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problema con tu envío de revista</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #0056b3;
+            margin: 0;
+        }
+        .content {
+            padding: 15px 0;
+        }
+        .address {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #0056b3;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .button {
+            display: inline-block;
+            background-color: #0056b3;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .button:hover {
+            background-color: #003d82;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Problema con tu envío de revista</h1>
+    </div>
+    
+    <div class="content">
+        <p>Estimado/a {{ name }},</p>
+        
+        <p>Esperamos que estés bien. Te contactamos porque nos ha sido devuelto por Correos el último ejemplar de nuestra revista que te enviamos a la siguiente dirección:</p>
+        
+        <div class="address">
+            {{ address }}
+        </div>
+        
+        <p>Nos gustaría confirmar si esta dirección sigue siendo correcta o si necesitamos actualizarla en nuestra base de datos para asegurarnos de que recibas tus ejemplares sin problemas.</p>
+        
+        <p>Por favor, responde a este correo para confirmar si:</p>
+        <ol>
+            <li>La dirección es correcta (podría tratarse de un error por parte de Correos)</li>
+            <li>La dirección ha cambiado (en este caso, indícanos tu nueva dirección)</li>
+            <li>Prefieres que te enviemos la revista a otra dirección</li>
+        </ol>
+        
+        <p>Si deseas actualizar tu dirección, también puedes hacerlo a través de nuestra página web:</p>
+        
+        <a href="#" class="button">Actualizar mi dirección</a>
+        
+        <p>Gracias por tu atención. Estamos comprometidos a asegurarnos de que recibas todos tus ejemplares puntualmente.</p>
+        
+        <p>Saludos cordiales,</p>
+        <p>El equipo de la revista</p>
+    </div>
+    
+    <div class="footer">
+        <p>Este es un correo automático generado por nuestro sistema. Por favor, no respondas directamente a este correo.</p>
+        <p>Si tienes alguna pregunta, contáctanos a través de nuestro formulario de contacto o escríbenos a info@revista.com</p>
+    </div>
+</body>
+</html>
