@@ -75,7 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            displayResults(data);
+            if (data.status === 'match_found') {
+                showConfirmationScreen(data);
+            } else {
+                displayResults(data);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -86,6 +90,40 @@ document.addEventListener('DOMContentLoaded', function() {
             hideElement(loadingIndicator);
             processingImage = false;
         });
+    }
+    
+    // Show confirmation screen with preview
+    function showConfirmationScreen(data) {
+        // Hide webcam container and other elements
+        hideElement(webcamContainer);
+        hideElement(captureBtn);
+        hideElement(manualEntryBtn);
+        hideElement(manualAddressForm);
+        
+        // Show confirmation container
+        showElement(document.getElementById('confirmation-container'));
+        
+        // Fill in the data
+        const confirmationAddress = document.getElementById('confirmation-address');
+        const confirmationSubscriber = document.getElementById('confirmation-subscriber');
+        const emailPreview = document.getElementById('email-preview');
+        
+        // Display extracted address
+        confirmationAddress.innerHTML = `<strong>${data.extracted_address}</strong>`;
+        
+        // Display subscriber information
+        const subscriber = data.subscriber;
+        confirmationSubscriber.innerHTML = `
+            <strong>Nombre:</strong> ${subscriber.name || 'N/A'}<br>
+            <strong>Email:</strong> ${subscriber.email || 'N/A'}<br>
+            <strong>Dirección registrada:</strong> ${subscriber.address || 'N/A'}
+        `;
+        
+        // Load email preview
+        loadEmailPreview(subscriber);
+        
+        // Setup event listeners for confirmation buttons
+        setupConfirmationButtons(data);
     }
     
     // Process manually entered address
@@ -112,7 +150,11 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            displayResults(data);
+            if (data.status === 'match_found') {
+                showConfirmationScreen(data);
+            } else {
+                displayResults(data);
+            }
         })
         .catch(error => {
             console.error('Error:', error);

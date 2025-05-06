@@ -51,7 +51,7 @@ def index():
 
 @app.route('/process-image', methods=['POST'])
 def process_image():
-    """Process the captured webcam image, extract address, find matching subscriber, and send email"""
+    """Process the captured webcam image, extract address, find matching subscriber"""
     try:
         # Get image data from the request
         image_data = request.json.get('image')
@@ -85,32 +85,17 @@ def process_image():
                 'extracted_address': extracted_address
             })
         
-        # Send notification email
-        logger.debug(f"Sending email to {matched_subscriber['email']}")
-        email_sent = send_notification_email(matched_subscriber)
-        
-        if email_sent:
-            return jsonify({
-                'status': 'success',
-                'message': 'Email notification sent successfully',
-                'subscriber': {
-                    'name': matched_subscriber.get('name', 'Subscriber'),
-                    'email': matched_subscriber.get('email', ''),
-                    'address': matched_subscriber.get('address', '')
-                },
-                'extracted_address': extracted_address
-            })
-        else:
-            return jsonify({
-                'status': 'email_error',
-                'message': 'Failed to send notification email',
-                'subscriber': {
-                    'name': matched_subscriber.get('name', 'Subscriber'),
-                    'email': matched_subscriber.get('email', ''),
-                    'address': matched_subscriber.get('address', '')
-                },
-                'extracted_address': extracted_address
-            })
+        # Return the extracted address and matched subscriber for confirmation
+        return jsonify({
+            'status': 'match_found',
+            'message': 'Se ha encontrado un suscriptor que coincide con la dirección',
+            'subscriber': {
+                'name': matched_subscriber.get('name', 'Subscriber'),
+                'email': matched_subscriber.get('email', ''),
+                'address': matched_subscriber.get('address', '')
+            },
+            'extracted_address': extracted_address
+        })
     
     except Exception as e:
         logger.error(f"Error processing image: {str(e)}")
@@ -139,29 +124,17 @@ def manual_entry():
                 'provided_address': address_text
             })
         
-        # Send notification email
-        email_sent = send_notification_email(matched_subscriber)
-        
-        if email_sent:
-            return jsonify({
-                'status': 'success',
-                'message': 'Email notification sent successfully',
-                'subscriber': {
-                    'name': matched_subscriber.get('name', 'Subscriber'),
-                    'email': matched_subscriber.get('email', ''),
-                    'address': matched_subscriber.get('address', '')
-                }
-            })
-        else:
-            return jsonify({
-                'status': 'email_error',
-                'message': 'Failed to send notification email',
-                'subscriber': {
-                    'name': matched_subscriber.get('name', 'Subscriber'),
-                    'email': matched_subscriber.get('email', ''),
-                    'address': matched_subscriber.get('address', '')
-                }
-            })
+        # Return the extracted address and matched subscriber for confirmation
+        return jsonify({
+            'status': 'match_found',
+            'message': 'Se ha encontrado un suscriptor que coincide con la dirección',
+            'subscriber': {
+                'name': matched_subscriber.get('name', 'Subscriber'),
+                'email': matched_subscriber.get('email', ''),
+                'address': matched_subscriber.get('address', '')
+            },
+            'extracted_address': address_text
+        })
     
     except Exception as e:
         logger.error(f"Error processing manual entry: {str(e)}")
@@ -172,6 +145,78 @@ def manual_entry():
 def page_not_found(e):
     """Handle 404 errors"""
     return render_template('index.html'), 404
+
+@app.route('/preview-email', methods=['POST'])
+def preview_email():
+    """Generate a preview of the email template with subscriber data"""
+    try:
+        # Get subscriber data from request
+        subscriber_data = request.json.get('subscriber')
+        if not subscriber_data:
+            return jsonify({'error': 'No subscriber data provided'}), 400
+        
+        # Render the email template
+        from email_sender import render_email_template
+        email_html = render_email_template(subscriber_data)
+        
+        return jsonify({
+            'status': 'success',
+            'email_html': email_html
+        })
+    except Exception as e:
+        logger.error(f"Error generating email preview: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+@app.route('/send-email', methods=['POST'])
+def send_email():
+    """Send notification email to the matched subscriber"""
+    try:
+        # Get subscriber data from request
+        subscriber_data = request.json.get('subscriber')
+        if not subscriber_data:
+            return jsonify({'error': 'No subscriber data provided'}), 400
+        
+        # Send the notification email
+        from email_sender import send_notification_email
+        email_sent = send_notification_email(subscriber_data)
+        
+        # Save the processed mail entry in the database
+        try:
+            from models import ProcessedMail
+            from datetime import datetime
+            
+            processed_mail = ProcessedMail(
+                subscriber_email=subscriber_data.get('email', ''),
+                extracted_address=request.json.get('extracted_address', ''),
+                notification_sent=email_sent,
+                processed_at=datetime.utcnow(),
+                result_message='Email sent successfully' if email_sent else 'Failed to send email'
+            )
+            
+            with app.app_context():
+                db.session.add(processed_mail)
+                db.session.commit()
+                logger.info(f"Saved processed mail record for {subscriber_data.get('email', '')}")
+        except Exception as db_error:
+            logger.error(f"Error saving to database: {str(db_error)}")
+        
+        if email_sent:
+            return jsonify({
+                'status': 'success',
+                'message': 'Email notification sent successfully',
+                'subscriber': subscriber_data
+            })
+        else:
+            return jsonify({
+                'status': 'email_error',
+                'message': 'Failed to send notification email',
+                'subscriber': subscriber_data
+            })
+    except Exception as e:
+        logger.error(f"Error sending email: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 @app.errorhandler(500)
 def server_error(e):

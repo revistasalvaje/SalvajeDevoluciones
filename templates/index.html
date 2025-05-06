@@ -58,6 +58,51 @@
                     <span class="ms-2">Procesando...</span>
                 </div>
                 
+                <!-- Confirmation Screen -->
+                <div id="confirmation-container" class="d-none">
+                    <h4 class="mb-3">Confirmación antes de enviar</h4>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Revisa los datos antes de enviar la notificación
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Dirección extraída</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="confirmation-address"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Datos del suscriptor</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="confirmation-subscriber"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Vista previa del email</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="email-preview" class="border p-3" style="max-height: 300px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button id="edit-btn" class="btn btn-secondary">
+                            <i class="fas fa-pen me-1"></i> Editar datos
+                        </button>
+                        <button id="send-email-btn" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i> Enviar email
+                        </button>
+                    </div>
+                </div>
+                
                 <!-- Result Display -->
                 <div id="result-container" class="d-none">
                     <h4 class="mb-3">Resultado del procesamiento</h4>
@@ -67,6 +112,10 @@
                     <div id="extracted-address" class="d-none"></div>
                     
                     <div id="subscriber-info" class="d-none"></div>
+                    
+                    <button id="new-search-btn" class="btn btn-primary mt-3">
+                        <i class="fas fa-search me-1"></i> Nueva búsqueda
+                    </button>
                 </div>
             </div>
         </div>
@@ -81,7 +130,8 @@
                     <li class="mb-2">Coloca el sobre devuelto frente a la cámara, asegurándote de que la dirección sea visible.</li>
                     <li class="mb-2">Haz clic en "Capturar imagen" para tomar una foto del sobre.</li>
                     <li class="mb-2">El sistema extraerá la dirección postal mediante OCR y buscará coincidencias en la base de datos de suscriptores.</li>
-                    <li class="mb-2">Si se encuentra una coincidencia, se enviará automáticamente un email al suscriptor.</li>
+                    <li class="mb-2">Revisa los datos detectados y la vista previa del email antes de continuar.</li>
+                    <li class="mb-2">Haz clic en "Enviar email" para notificar al suscriptor o "Editar datos" para corregir la información.</li>
                     <li>Si prefieres introducir la dirección manualmente, haz clic en "Entrada manual".</li>
                 </ol>
             </div>
